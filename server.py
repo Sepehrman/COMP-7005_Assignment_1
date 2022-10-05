@@ -1,3 +1,4 @@
+import re
 import socket
 import os
 from request import ServerRequest
@@ -20,16 +21,30 @@ def create_directory(directory):
         print("Error Creating directory " + directory)
 
 
+# def get_version_number
+
 def generate_new_file_version(filename, directory):
+    print("INVESTIGATING DUPLICATE FOR", filename)
     file_split = filename.split('.')
-    print("LIST DIRECTORY", os.listdir(f"{directory}"))
     for file in os.listdir(f"{directory}"):
-        if filename == file:
-            print(filename, " = ", file)
-            print("contains file")
+        print(file, " =? ", filename)
+        if file == filename:
+            print('yes (:')
+            # filename += file_split[0] + '-v' + file_split[1]
 
+            # TODO: GET VERSION NUMBER
+            version_num = re.search('-v(.*)[.]', filename)
+            print(version_num)
+            if version_num is None:
+                file_split[0] += '-v1'
 
-    return f'{file_split[0]}-v{len(os.listdir(f"{directory}"))}.{file_split[1]}'
+            else:
+                version_num += 1
+                file_split[0] += version_num
+            break
+
+    print(f'{file_split[0]}.{file_split[1]}')
+    return f'{file_split[0]}.{file_split[1]}'
 
 
 def execute_request(req: ServerRequest):
@@ -64,22 +79,19 @@ def execute_request(req: ServerRequest):
         create_directory(write_to_directory)
 
         if os.path.exists(f"{write_to_directory}/{filename}"):
-            print(f'the file {filename} exists')
             filename = generate_new_file_version(filename, write_to_directory)
-            print(f'NEW FILE  {filename}')
 
         with open(f"{write_to_directory}/{filename}", "wb") as f:
             while True:
                 # read 1024 bytes from the socket (receive)
                 bytes_read = client_socket.recv(BUFFER_SIZE)
                 if not bytes_read:
-                    print("done")
+                    # print("done")
                     # nothing is received
                     # file transmitting is done
                     break
                 # write to the file the bytes we just received
                 f.write(bytes_read)
-                print("Incoming file " + str(bytes_read))
                 # update the progress bar
 
         # close the client socket
@@ -110,7 +122,6 @@ def setup_server_cmd_request() -> ServerRequest:
 
 def main():
     request = setup_server_cmd_request()
-    print(request.root_directory)
     execute_request(request)
 
 
