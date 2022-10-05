@@ -1,6 +1,9 @@
+import glob
 import re
 import socket
 import os
+import sys
+
 from request import ServerRequest
 import argparse
 
@@ -24,35 +27,28 @@ def create_directory(directory):
 # def get_version_number
 
 def generate_new_file_version(filename, directory):
-    print("INVESTIGATING DUPLICATE FOR", filename)
     file_split = filename.split('.')
+    matching_files = os.listdir(f"{directory}")
+    r = re.compile(f'{file_split[0]}-v.*{file_split[1]}')
+    file_versions = sorted(list(filter(r.match, matching_files)))
     for file in os.listdir(f"{directory}"):
-        print(file, " =? ", filename)
         if file == filename:
-            print('yes (:')
-            # filename += file_split[0] + '-v' + file_split[1]
 
-            # TODO: GET VERSION NUMBER
-            version_num = re.search('-v(.*)[.]', filename)
-            print(version_num)
-            if version_num is None:
+            if len(file_versions) == 0:
                 file_split[0] += '-v1'
-
             else:
-                version_num += 1
-                file_split[0] += version_num
+
+                last_file_version = file_versions[-1]
+                last_file_version = int(last_file_version[last_file_version.index('-v') + 2]) + 1
+                file_split[0] += f'-v{last_file_version:_}'
             break
 
-    print(f'{file_split[0]}.{file_split[1]}')
     return f'{file_split[0]}.{file_split[1]}'
 
 
 def execute_request(req: ServerRequest):
-    # create the server socket
-    # TCP socket
     s = socket.socket()
 
-    # bind the socket to our local address
     s.bind((SERVER_HOST, req.port))
 
     s.listen(MAX_INCOMING_CONNECTIONS)
@@ -113,11 +109,13 @@ def setup_server_cmd_request() -> ServerRequest:
         req.root_directory = args.directory
         req.port = args.port
 
-        print(args)
         return req
     except Exception as e:
         print(f"Error! Could not recognized arguments.\n{e}")
         quit()
+    except KeyboardInterrupt:
+        'Interrupted'
+        sys.exit(0)
 
 
 def main():
