@@ -59,7 +59,7 @@ def execute_request(req: ServerRequest):
         # accept connection if there is any
         client_socket, address = s.accept()
         # if below code is executed, that means the sender is connected
-        print(f"[LOG] {address} is connected.")
+        print(f"[LOG] {address} has connnected.")
 
         # receive the file infos
         # receive using client socket, not server socket
@@ -111,7 +111,7 @@ def setup_server_cmd_request() -> ServerRequest:
 
         return req
     except Exception as e:
-        print(f"Error! Could not recognized arguments.\n{e}")
+        print(f"An unexpected error occurred. {e}")
         quit()
     except KeyboardInterrupt:
         'Interrupted'
