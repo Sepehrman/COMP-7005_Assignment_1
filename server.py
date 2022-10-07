@@ -47,51 +47,57 @@ def generate_new_file_version(filename, directory):
 
 
 def execute_request(req: ServerRequest):
-    s = socket.socket()
 
-    s.bind((SERVER_HOST, req.port))
 
-    s.listen(MAX_INCOMING_CONNECTIONS)
-    print(f"[LOG] Listening as {SERVER_HOST}:{req.port}")
+    try:
+        s = socket.socket()
 
-    accepting = True
-    while accepting:
-        # accept connection if there is any
-        client_socket, address = s.accept()
-        # if below code is executed, that means the sender is connected
-        print(f"[LOG] {address} has connnected.")
+        s.bind((SERVER_HOST, req.port))
 
-        # receive the file infos
-        # receive using client socket, not server socket
-        received = client_socket.recv(BUFFER_SIZE).decode()
-        filename, filesize = received.split(SEPARATOR)
-        # remove absolute path if there is
-        filename = os.path.basename(filename)
-        # convert to integer
+        s.listen(MAX_INCOMING_CONNECTIONS)
+        print(f"[LOG] Listening as {SERVER_HOST}:{req.port}")
 
-        # start receiving the file from the socket
-        # and writing to the file stream
-        write_to_directory = req.root_directory + f'/{address[0]}'
-        create_directory(write_to_directory)
+        accepting = True
+        while accepting:
+            # accept connection if there is any
+            client_socket, address = s.accept()
+            # if below code is executed, that means the sender is connected
+            print(f"[LOG] {address} has connnected.")
 
-        if os.path.exists(f"{write_to_directory}/{filename}"):
-            filename = generate_new_file_version(filename, write_to_directory)
+            # receive the file infos
+            # receive using client socket, not server socket
+            received = client_socket.recv(BUFFER_SIZE).decode()
+            filename, filesize = received.split(SEPARATOR)
+            # remove absolute path if there is
+            filename = os.path.basename(filename)
+            # convert to integer
 
-        with open(f"{write_to_directory}/{filename}", "wb") as f:
-            while True:
-                # read 1024 bytes from the socket (receive)
-                bytes_read = client_socket.recv(BUFFER_SIZE)
-                if not bytes_read:
-                    # print("done")
-                    # nothing is received
-                    # file transmitting is done
-                    break
-                # write to the file the bytes we just received
-                f.write(bytes_read)
-                # update the progress bar
+            # start receiving the file from the socket
+            # and writing to the file stream
+            write_to_directory = req.root_directory + f'/{address[0]}'
+            create_directory(write_to_directory)
 
-        # close the client socket
-        client_socket.close()
+            if os.path.exists(f"{write_to_directory}/{filename}"):
+                filename = generate_new_file_version(filename, write_to_directory)
+
+            with open(f"{write_to_directory}/{filename}", "wb") as f:
+                while True:
+                    # read 1024 bytes from the socket (receive)
+                    bytes_read = client_socket.recv(BUFFER_SIZE)
+                    if not bytes_read:
+                        # print("done")
+                        # nothing is received
+                        # file transmitting is done
+                        break
+                    # write to the file the bytes we just received
+                    f.write(bytes_read)
+                    # update the progress bar
+
+            # close the client socket
+            client_socket.close()
+    except FileNotFoundError:
+        print("Given Directory does not exist")
+        quit()
     # close the server socket
     s.close()
 
