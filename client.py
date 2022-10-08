@@ -34,10 +34,8 @@ def setup_client_cmd_request() -> ClientRequest:
                 file_type = filename.split(".")[1]
                 req.files = list(filter(lambda k: f'.{file_type}' not in k, req.files))
                 req.files.extend(get_all_files_by_type(file_type))
-                print('sending all files', req.files)
 
 
-        print(req.files)
 
         return req
     except Exception as e:

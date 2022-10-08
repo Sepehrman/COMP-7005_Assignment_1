@@ -98,6 +98,8 @@ def execute_request(req: ServerRequest):
     except FileNotFoundError:
         print("Given Directory does not exist")
         quit()
+    except KeyboardInterrupt:
+        quit()
     # close the server socket
     s.close()
 
@@ -120,8 +122,7 @@ def setup_server_cmd_request() -> ServerRequest:
         print(f"An unexpected error occurred. {e}")
         quit()
     except KeyboardInterrupt:
-        'Interrupted'
-        sys.exit(0)
+        quit()
 
 
 def main():
