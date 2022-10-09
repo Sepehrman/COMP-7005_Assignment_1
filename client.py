@@ -48,12 +48,9 @@ def get_all_files_by_type(type):
 
 
 def execute_request(req: ClientRequest):
-    # the port, let's use 5001
-    # the name of file we want to send, make sure it exists
     for file in req.files:
         try:
             filename = file
-            # get the file size
             filesize = os.path.getsize(filename)
 
             s = socket.socket()
@@ -61,21 +58,14 @@ def execute_request(req: ClientRequest):
             s.connect((req.ip_address, req.port))
             print("[+] Connected.")
 
-            # send the filename and filesize
             s.send(f"{filename}{SEPARATOR}{filesize}".encode())
 
-            # start sending the file
             with open(filename, "rb") as f:
                 while True:
-                    # read the bytes from the file
                     bytes_read = f.read(BUFFER_SIZE)
                     if not bytes_read:
-                        # file transmitting is done
                         break
-                    # we use sendall to assure transimission in
-                    # busy networks
                     s.sendall(bytes_read)
-                    # update the progress bar
         except socket.timeout as e:
             print(f"Timeout Error {e}")
             quit()

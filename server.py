@@ -24,8 +24,6 @@ def create_directory(directory):
         print("Error Creating directory " + directory)
 
 
-# def get_version_number
-
 def generate_new_file_version(filename, directory):
     file_split = filename.split('.')
     matching_files = os.listdir(f"{directory}")
@@ -48,7 +46,6 @@ def generate_new_file_version(filename, directory):
 
 def execute_request(req: ServerRequest):
 
-
     try:
         s = socket.socket()
 
@@ -59,21 +56,13 @@ def execute_request(req: ServerRequest):
 
         accepting = True
         while accepting:
-            # accept connection if there is any
             client_socket, address = s.accept()
-            # if below code is executed, that means the sender is connected
             print(f"[LOG] {address} has connnected.")
 
-            # receive the file infos
-            # receive using client socket, not server socket
             received = client_socket.recv(BUFFER_SIZE).decode()
             filename, filesize = received.split(SEPARATOR)
-            # remove absolute path if there is
             filename = os.path.basename(filename)
-            # convert to integer
 
-            # start receiving the file from the socket
-            # and writing to the file stream
             write_to_directory = req.root_directory + f'/{address[0]}'
             create_directory(write_to_directory)
 
@@ -82,25 +71,17 @@ def execute_request(req: ServerRequest):
 
             with open(f"{write_to_directory}/{filename}", "wb") as f:
                 while True:
-                    # read 1024 bytes from the socket (receive)
                     bytes_read = client_socket.recv(BUFFER_SIZE)
                     if not bytes_read:
-                        # print("done")
-                        # nothing is received
-                        # file transmitting is done
                         break
-                    # write to the file the bytes we just received
                     f.write(bytes_read)
-                    # update the progress bar
 
-            # close the client socket
             client_socket.close()
     except FileNotFoundError:
         print("Given Directory does not exist")
         quit()
     except KeyboardInterrupt:
         quit()
-    # close the server socket
     s.close()
 
 
